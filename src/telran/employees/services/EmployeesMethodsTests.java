@@ -103,23 +103,24 @@ class EmployeesMethodsTests {
 		}
 		List<Employee> act = (List<Employee>) employees.getEmployeesByAge(1, 5);
 		assertTrue(act.isEmpty());
-		act = (List<Employee>) employees.getEmployeesByAge(50, 20);
-		assertTrue(act.isEmpty());
+//
+			act = (List<Employee>) employees.getEmployeesByAge(50, 20);	
+			assertTrue(act.isEmpty());
 
 	}
 
 	@Test
 	void testGetEmployeesBySalary() {
-		List<Employee> exp = Arrays.asList(empl6, empl5, empl1, empl2);
+
 		List<Employee> act = (List<Employee>) employees.getEmployeesBySalary(1000, SALARY2);
 		for (Employee e : act) {
-			assertTrue(exp.contains(e));
+			assertTrue(employeesList.contains(e));
 		}
-		assertEquals(4, act.size());
+		assertEquals(6, act.size());
 		assertIterableEquals(Collections.emptyList(), employees.getEmployeesBySalary(8000, 10000));
 		act = (List<Employee>) employees.getEmployeesBySalary(9000, 1000);
 		assertTrue(act.isEmpty());
-		act = (List<Employee>) employees.getEmployeesBySalary(9, 1000);
+		act = (List<Employee>) employees.getEmployeesBySalary(9, 100);
 		assertTrue(act.isEmpty());
 
 	}

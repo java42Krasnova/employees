@@ -20,6 +20,15 @@ public Employee(long id, String name, LocalDate birthDate, int salary, String de
 public Employee() {
 	
 }
+public Employee(Employee employee) {
+	id = employee.id;
+	name = employee.name;
+	birthDate = employee.birthDate;
+	salary = employee.salary;
+	department =employee.department;
+}
+
+
 @Override
 public int hashCode() {
 	return Objects.hash(id);

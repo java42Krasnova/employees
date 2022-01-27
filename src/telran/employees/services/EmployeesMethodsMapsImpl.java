@@ -39,86 +39,94 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 			return ReturnCode.EMPLOYEE_NOT_FOUND;
 		}
 		Employee emplForRemove = mapEmployees.remove(id);
-		removingFromMaps(emplForRemove);
+		updateMapAges(emplForRemove);
+		updateMapSalary(emplForRemove);
+		updateMapDepartments(emplForRemove);
 		return ReturnCode.OK;
 	}
 
-	private void removingFromMaps(Employee emplForRemove) {
-		List<Employee> valueListTmp = employeesAge.get(getAge(emplForRemove));
-		if (isNeedRemoveKeyFromMap(valueListTmp, emplForRemove)) {
-			employeesAge.remove(getAge(emplForRemove));
-		}
-		valueListTmp = employeesSalary.get(emplForRemove.salary);
-		if (isNeedRemoveKeyFromMap(valueListTmp, emplForRemove)) {
-			employeesSalary.remove(emplForRemove.salary);
-		}
-		valueListTmp = employeesDepartment.get(emplForRemove.department);
-		if (isNeedRemoveKeyFromMap(valueListTmp, emplForRemove)) {
+	private void updateMapDepartments(Employee emplForRemove) {
+		List<Employee> listEmplByDepartment = employeesDepartment.get(emplForRemove.department);
+		listEmplByDepartment.remove(emplForRemove);
+		if (listEmplByDepartment.isEmpty()) {
 			employeesDepartment.remove(emplForRemove.department);
 		}
 	}
 
-	private boolean isNeedRemoveKeyFromMap(List<Employee> valueListTmp, Employee emplForRemove) {
-		valueListTmp.remove(emplForRemove);
-		return valueListTmp.isEmpty();
+	private void updateMapSalary(Employee emplForRemove) {
+		List<Employee> listEmplByDep = employeesSalary.get(emplForRemove.salary);
+		listEmplByDep.remove(emplForRemove);
+		if (listEmplByDep.isEmpty()) {
+			employeesSalary.remove(emplForRemove.salary);
+		}
+	}
+
+	private void updateMapAges(Employee emplForRemove) {
+		List<Employee> listEmplByAge = employeesAge.get(getAge(emplForRemove));
+		listEmplByAge.remove(emplForRemove);
+		if (listEmplByAge.isEmpty()) {
+			employeesAge.remove(getAge(emplForRemove));
+		}
 	}
 
 	@Override
 	public Iterable<Employee> getAllEmployees() {
-		List<Employee> allEmployeesList = mapEmployees.isEmpty()?Collections.emptyList():
-				 mapEmployees.values().stream().toList();
-		return allEmployeesList.isEmpty() ? allEmployeesList
-				: getEmployeesFromList(allEmployeesList);
+		return getEmployeesFromList(mapEmployees.values().stream().toList());
 	}
 
 	@Override
 	public Employee getEmployee(long id) {
-		return  mapEmployees.get(id);
+		// return mapEmployees.containsKey(id)? new Employee(id,
+		// mapEmployees.get(id).name, mapEmployees.get(id).birthDate,
+		// mapEmployees.get(id).salary, mapEmployees.get(id).department) : null ;
+
+		return mapEmployees.containsKey(id) ? new Employee(mapEmployees.get(id)) : null;
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesByAge(int ageFrom, int ageTo) {
-		if(ageTo < ageFrom || employeesAge.isEmpty()) {
+		List<Employee> listEmplByAge;
+		try {
+			listEmplByAge = employeesAge.subMap(ageFrom, true, ageTo, true).values().stream()
+					.flatMap(c -> c.stream()).toList();
+		} catch (IllegalArgumentException e) {
 			return Collections.emptyList();
 		}
-		Map<Integer, List<Employee>> mapEmplByAge = employeesAge.subMap(ageFrom, ageTo);
-		List<Employee> listEmplByAge = mapEmplByAge.isEmpty() ? Collections.emptyList():
-			mapEmplByAge.values().stream().flatMap(c -> c.stream()).toList();
-		return listEmplByAge.isEmpty() ? listEmplByAge : getEmployeesFromList(listEmplByAge);
+		return getEmployeesFromList(listEmplByAge);
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesBySalary(int salaryFrom, int salaryTo) {
-		if(salaryTo < salaryFrom || employeesSalary.isEmpty()) {
+		List<Employee> listEmplBySalary;
+		try {
+			listEmplBySalary = employeesSalary.subMap(salaryFrom, true, salaryTo, true).values().stream()
+					.flatMap(s -> s.stream()).toList();
+		} catch (IllegalArgumentException e) {
 			return Collections.emptyList();
 		}
-		Map<Integer, List<Employee>> mapEmplBySalary = employeesSalary.subMap(salaryFrom, salaryTo);
-		List<Employee> listEmplBySalary = mapEmplBySalary.isEmpty()? Collections.emptyList():
-			mapEmplBySalary.values().stream().flatMap(s -> s.stream()).toList();
-
-		return listEmplBySalary.isEmpty()? Collections.emptyList():getEmployeesFromList(listEmplBySalary); 
+		return  getEmployeesFromList(listEmplBySalary);
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesByDepartment(String department) {
-		List<Employee> listEmployeesInDepartment = employeesDepartment.getOrDefault(department, Collections.emptyList());
-		return listEmployeesInDepartment.isEmpty() ? listEmployeesInDepartment : getEmployeesFromList(listEmployeesInDepartment);
+		List<Employee> listEmployeesInDepartment = employeesDepartment.getOrDefault(department,
+				Collections.emptyList());
+		return listEmployeesInDepartment.isEmpty() ? listEmployeesInDepartment
+				: getEmployeesFromList(listEmployeesInDepartment);
 	}
 
 	private Iterable<Employee> getEmployeesFromList(List<Employee> employees) {
 		return employees.stream()
-				.map(e -> new Employee(e.id, e.name, e.birthDate, e.salary, e.department)).toList();
+				// .map(e -> new Employee(e.id, e.name, e.birthDate, e.salary,
+				// e.department)).toList();
+				.map(e -> new Employee(e)).toList();
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesByDepartmentAndSalary(String department, int salaryFrom, int salaryTo) {
-		if(employeesDepartment.isEmpty()|| !employeesDepartment.containsKey(department) || salaryTo < salaryFrom) {
-			return Collections.emptyList();
-		}
 		List<Employee> listEmployeesInSallaryRange = employeesDepartment.get(department).stream()
-			.filter(e -> e.salary >= salaryFrom && e.salary < salaryTo).toList();
-		
-		return listEmployeesInSallaryRange.isEmpty()? listEmployeesInSallaryRange: getEmployeesFromList(listEmployeesInSallaryRange);
+				.filter(e -> e.salary >= salaryFrom && e.salary <= salaryTo).toList();
+		return getEmployeesFromList(listEmployeesInSallaryRange);
 	}
 
 	@Override
@@ -126,11 +134,8 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 		if (!mapEmployees.containsKey(id)) {
 			return ReturnCode.EMPLOYEE_NOT_FOUND;
 		}
-		Employee emplToUpdate = getEmployee(id);
-		List<Employee> tmpListEmpl = employeesSalary.get(emplToUpdate.salary);
-		if(isNeedRemoveKeyFromMap(tmpListEmpl, emplToUpdate)){
-			employeesSalary.remove(emplToUpdate.salary);
-		}
+		Employee emplToUpdate = mapEmployees.get(id);
+		updateMapSalary(emplToUpdate);
 		emplToUpdate.salary = newSalary;
 		employeesSalary.computeIfAbsent(newSalary, k -> new LinkedList<Employee>()).add(emplToUpdate);
 		return ReturnCode.OK;
@@ -141,11 +146,8 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 		if (!mapEmployees.containsKey(id)) {
 			return ReturnCode.EMPLOYEE_NOT_FOUND;
 		}
-		Employee emplToUpdate = getEmployee(id);
-		List<Employee> tmpListEmpl = employeesDepartment.get(emplToUpdate.department);
-		if(isNeedRemoveKeyFromMap(tmpListEmpl, emplToUpdate)){
-			employeesDepartment.remove(emplToUpdate.department);
-		}
+		Employee emplToUpdate = mapEmployees.get(id);
+		updateMapDepartments(emplToUpdate);
 		emplToUpdate.department = newDepartment;
 		employeesDepartment.computeIfAbsent(newDepartment, k -> new LinkedList<Employee>()).add(emplToUpdate);
 		return ReturnCode.OK;
