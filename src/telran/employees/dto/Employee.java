@@ -45,4 +45,10 @@ public boolean equals(Object obj) {
 	return id == other.id;
 }
 
+@Override
+public String toString() {
+	return "Employee [id=" + id + ", name=" + name + ", birthDate=" + birthDate + ", salary=" + salary + ", department="
+			+ department + "]";
+}
+
 }
