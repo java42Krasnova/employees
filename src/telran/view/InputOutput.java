@@ -123,14 +123,10 @@ public interface InputOutput {
 	}
 
 	default LocalDate readDate(String prompt) {
-		String errorMessage = "wrong date format";
-		return readObject(prompt + " in ISO format yyyy-mm-dd", errorMessage, d -> {
-			try {
-				return LocalDate.parse(d);
-			} catch (DateTimeParseException e) {
-				throw new IllegalArgumentException();
-			}
-		});
+
+		DateTimeFormatter dtf = DateTimeFormatter.ISO_DATE;
+		return readDate(prompt + " in format yyyy-mm-dd" , dtf);
+
 	}
 
 	default LocalDate readDate(String prompt, DateTimeFormatter formatter) {
