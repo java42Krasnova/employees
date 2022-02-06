@@ -48,7 +48,7 @@ public boolean equals(Object obj) {
 @Override
 public String toString() {
 	return "Employee [id=" + id + ", name=" + name + ", birthDate=" + birthDate + ", salary=" + salary + ", department="
-			+ department + "]";
+			+ department + "]\n";
 }
 
 }

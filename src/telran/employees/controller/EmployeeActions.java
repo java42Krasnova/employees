@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import telran.employees.dto.Employee;
@@ -44,7 +45,7 @@ static private Employee enterEmployee(InputOutput io) {
 			String department = io.readString("enter department").toLowerCase();
 			return  new Employee(id, name, birthDate, salary, department);
 }
- private static HashSet<String> getListDepartments(){
+ private static Set<String> getListDepartments(){
 	List <Employee> allEmpl =  (List<Employee>) employees.getAllEmployees();
 	 return new HashSet<>(allEmpl.stream().map(e -> e.department).toList());
 }
@@ -77,13 +78,13 @@ static private  void getEmployeesBySalary(InputOutput io) {
 }
 
 static private  void getEmployeesByDepartment(InputOutput io) {
-	HashSet<String> departments = getListDepartments();
+	Set<String> departments = getListDepartments();
 	String department = io.readStringOption("Enter department " + departments, departments).toLowerCase();
 	io.writeObjectLine(employees.getEmployeesByDepartment(department));
 }
 
 static private  void getEmployeesByDepartmentAndSalary(InputOutput io) {
-	HashSet<String> departments = getListDepartments();
+	Set<String> departments = getListDepartments();
 	String department = io.readStringOption("Enter department from list" + departments, departments).toLowerCase();
 	
 	int minSalary = io.readInt("Enter min range for salary");
