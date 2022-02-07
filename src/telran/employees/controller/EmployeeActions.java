@@ -2,6 +2,7 @@ package telran.employees.controller;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,13 +16,16 @@ import telran.view.Item;
 
 public class EmployeeActions {
 private static final int MAX_AGE = 120;
+private static final HashSet<String> DEPARTMENTS = new HashSet<>(Arrays.asList("qa", "developer", "manager", "tester"));
 private static EmployeesMethods employees;
 private EmployeeActions(){
-	
+ 
 }
 static public ArrayList<Item> getEmployeesMenuItems(EmployeesMethods employees){
+	
 	EmployeeActions.employees = employees;
 	ArrayList<Item> items = new ArrayList<>();
+	
 	items.add(Item.of("Add new Employee", EmployeeActions::addEmployee));
 	items.add(Item.of("Remove Employee", EmployeeActions::removeEmployee));
 	items.add(Item.of("Get Employee by ID", EmployeeActions::getEmployee));
@@ -37,17 +41,15 @@ static public ArrayList<Item> getEmployeesMenuItems(EmployeesMethods employees){
 	return items;
 }
 static private Employee enterEmployee(InputOutput io) {
-			long id = io.readLong("Enter ID");
+			long id = io.readLong("Enter ID", 0, Long.MAX_VALUE -1);
 			String name = io.readStringPredicate("Enter name", "Name may contain only letters with first capital",
 					str -> str.matches("[A-Z][a-z]+"));
 			LocalDate birthDate = io.readDate("Enter birthdate in the yyyy-MM-dd format");
-			int salary = io.readInt("Enter Salary");
-			String department = io.readString("enter department").toLowerCase();
+			int salary = io.readInt("Enter Salary", 0, Integer.MAX_VALUE-1);
+			String department = io.readStringOption("Enter department from list" + DEPARTMENTS, DEPARTMENTS).toLowerCase();
+			//String department = io.readString("enter department").toLowerCase();
 			return  new Employee(id, name, birthDate, salary, department);
-}
- private static Set<String> getListDepartments(){
-	List <Employee> allEmpl =  (List<Employee>) employees.getAllEmployees();
-	 return new HashSet<>(allEmpl.stream().map(e -> e.department).toList());
+	
 }
 
 static private void addEmployee(InputOutput io) {
@@ -64,47 +66,42 @@ static private  void getEmployee(InputOutput io) {
 }
 
 static private  void getEmployeesByAge(InputOutput io) {
-	int ageFrom = io.readInt("enter age ranfe FROM");
-	int ageTo = io.readInt("enter age ranfe TO",ageFrom+1, MAX_AGE);
+	int ageFrom = io.readInt("enter age range FROM", 0, MAX_AGE-1);
+	int ageTo = io.readInt("enter age range TO",ageFrom+1, MAX_AGE);
 	
 	io.writeObjectLine((employees.getEmployeesByAge(ageFrom, ageTo)));
 }
 
 static private  void getEmployeesBySalary(InputOutput io) {
-	int minSalary = io.readInt("Enter min range for salary");
+	int minSalary = io.readInt("Enter min range for salary", 0, Integer.MAX_VALUE-1);
 	int maxSalary = io.readInt("Enter max range for salary", minSalary+1, Integer.MAX_VALUE);
 	
 	io.writeObjectLine(employees.getEmployeesBySalary(minSalary, maxSalary));
 }
 
 static private  void getEmployeesByDepartment(InputOutput io) {
-	Set<String> departments = getListDepartments();
-	String department = io.readStringOption("Enter department " + departments, departments).toLowerCase();
+	String department = io.readStringOption("Enter department " + DEPARTMENTS, DEPARTMENTS).toLowerCase();
 	io.writeObjectLine(employees.getEmployeesByDepartment(department));
 }
 
 static private  void getEmployeesByDepartmentAndSalary(InputOutput io) {
-	Set<String> departments = getListDepartments();
-	String department = io.readStringOption("Enter department from list" + departments, departments).toLowerCase();
+	String department = io.readStringOption("Enter department from list" + DEPARTMENTS, DEPARTMENTS).toLowerCase();
 	
-	int minSalary = io.readInt("Enter min range for salary");
+	int minSalary = io.readInt("Enter min range for salary",0, Integer.MAX_VALUE-1);
 	int maxSalary = io.readInt("Enter max range for salary", minSalary+1, Integer.MAX_VALUE);
-
 	io.writeObjectLine(employees.getEmployeesByDepartmentAndSalary(department, minSalary, maxSalary));
 }
 static private  void updateSalary(InputOutput io) {
 	
-	int emplID = io.readInt("enter employees id for update salary");
-	int newSalary = io.readInt("Enter new Salary");
-	if(newSalary < 0) {
-		throw new IllegalArgumentException("salary must be greather then zerro");
-	}
+	long emplID = io.readLong("enter employees id for update salary");
+	int newSalary = io.readInt("Enter new Salary", 0, Integer.MAX_VALUE);
+
 	io.writeObjectLine(employees.updateSalary(emplID, newSalary));
 }
 static private  void updateDepartment(InputOutput io) {
-	int emplID = io.readInt("enter employees id for update department");
+	long emplID = io.readLong("enter employees id for update department");
 	io.writeObjectLine("Now works in " + employees.getEmployee(emplID).department);
-	String newDepartment = io.readString("enter new department").toLowerCase();
+	String newDepartment = io.readStringOption("enter new department from list" + DEPARTMENTS, DEPARTMENTS).toLowerCase();
 	io.writeObjectLine(employees.updateDepartment(emplID, newDepartment));
 
 }
