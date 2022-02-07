@@ -39,13 +39,6 @@ public interface InputOutput {
 		}); 
 	}
 	default Integer readInt( String prompt) {
-//		int num = Integer.parseInt(prompt);
-//		if(num <= 0) {
-//			writeObjectLine("input must be greater then 0");
-//			throw new IllegalArgumentException();
-//		}
-//		return readObject(prompt, NO_NUMBER, n -> num);
-
 		return readObject(prompt, NO_NUMBER, Integer::parseInt);
 	}
 	default Double readDouble(String prompt) {
@@ -64,15 +57,7 @@ public interface InputOutput {
 		return readObject(prompt, NO_NUMBER, Long::parseLong);
 		
 	}
-	default Long readLong(String prompt, long min, long max) {
-		return readObject(prompt, String.format("No number in the range [%d-%d]",min,max), str -> {
-			long res = Long.parseLong(str);
-			if (res < min || res > max) {
-				throw new IllegalArgumentException();
-			}
-			return res;
-		});
-	}
+
 	default String readStringOption(String prompt, Set<String> options) {
 		return readStringPredicate(prompt, NO_OPTION, options::contains);
 		
