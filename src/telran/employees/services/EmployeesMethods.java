@@ -1,6 +1,8 @@
 package telran.employees.services;
+import java.io.Serializable;
+
 import telran.employees.dto.*;
-public interface EmployeesMethods {
+public interface EmployeesMethods extends Serializable{
 ReturnCode addEmployee(Employee empl);
 ReturnCode removeEmployee(long id);
 Iterable<Employee> getAllEmployees();
@@ -11,4 +13,6 @@ Iterable<Employee> getEmployeesByDepartment(String department);
 Iterable <Employee> getEmployeesByDepartmentAndSalary(String department, int salaryFrom, int salaryTo);
 ReturnCode updateSalary(long id, int newSalary);
 ReturnCode updateDepartment(long id, String newDepartment);
+void restore();//restore employees methods object from ObjectInputStream
+void save();//saves EmployeesMethods object into ObjectOutputStream
 }

@@ -29,6 +29,8 @@ static Item of(String name, Consumer<InputOutput> action) {
 	return of(name, action,false);
 }
 static Item exit() {
+	
 	return of("Exit", io -> {}, true);
 }
+
 }

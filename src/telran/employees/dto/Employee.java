@@ -1,9 +1,10 @@
 package telran.employees.dto;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Employee {
+public class Employee implements Serializable {
 public long id;
 public String name;
 public LocalDate birthDate;

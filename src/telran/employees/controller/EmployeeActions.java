@@ -1,115 +1,134 @@
 package telran.employees.controller;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.StreamSupport;
+import java.util.*;
 
 import telran.employees.dto.Employee;
 import telran.employees.services.EmployeesMethods;
-import telran.employees.services.EmployeesMethodsMapsImpl;
-import telran.view.InputOutput;
-import telran.view.Item;
-
+import telran.view.*;
 public class EmployeeActions {
-private static final int MAX_AGE = 120;
-private static final HashSet<String> DEPARTMENTS = new HashSet<>(Arrays.asList("qa", "developer", "manager", "tester"));
-private static final int MIN_AGE = 18;
 private static final int MIN_SALARY = 5000;
+private static final int MAX_SALARY = 40000;
+private static final int MIN_AGE = 18;
+private static final int MAX_AGE = 70;
 private static EmployeesMethods employees;
-private EmployeeActions(){
- 
+private static ArrayList<Item> items;
+private static Set<String> departments;
+private EmployeeActions() {
+	
 }
-static public ArrayList<Item> getEmployeesMenuItems(EmployeesMethods employees){
-	
+public static ArrayList<Item> getActionItems(EmployeesMethods employees, Set<String> departments) {
 	EmployeeActions.employees = employees;
-	ArrayList<Item> items = new ArrayList<>();
-	
-	items.add(Item.of("Add new Employee", EmployeeActions::addEmployee));
-	items.add(Item.of("Remove Employee", EmployeeActions::removeEmployee));
-	items.add(Item.of("Get Employee by ID", EmployeeActions::getEmployee));
-	items.add(Item.of("Get all Employees", EmployeeActions::getAllEmployees));
-	items.add(Item.of("Get Employees by age", EmployeeActions::getEmployeesByAge));
-	items.add(Item.of("Get Employees by salary", EmployeeActions::getEmployeesBySalary));
-	items.add(Item.of("Get Employees by department", EmployeeActions::getEmployeesByDepartment));
-	items.add(Item.of("Get Employees by depatment and salary", EmployeeActions::getEmployeesByDepartmentAndSalary));
-	items.add(Item.of("Update salary", EmployeeActions::updateSalary));
-	items.add(Item.of("Update department", EmployeeActions::updateDepartment));
-	items.add(Item.exit());
+	EmployeeActions.departments = departments;
+		items = new ArrayList<>(Arrays.asList(new Item[] {
+			Item.of("Hiring new Employee", EmployeeActions::hireEmployee),
+			Item.of("Firing Employee ", EmployeeActions::fireEmployee )	,
+			Item.of("Updating salary", EmployeeActions::updateSalary),
+			Item.of("Updating department", EmployeeActions::updateDepartment),
+			Item.of("Display Employee Info", EmployeeActions::displayEmployee),
+			Item.of("Display Employees Info filtered by Age", EmployeeActions::displayEmployeesAge)	,
+			Item.of("Display Employees Info filtered by Salary", EmployeeActions::displayEmployeesSalary),
+			Item.of("Display Employees Info of Department", EmployeeActions::displayEmployeesDepartment),
+			Item.of("Display Employees Info filtered by Salary and Department", EmployeeActions::displayEmployeesSalaryDepartment),
+			Item.of("Display Employees Info", EmployeeActions::displayEmployees),
+			Item.of("Save without Exit", io -> employees.save()),
+			Item.of("Save and Exit", io -> employees.save(), true),
+			Item.exit()//TODO there should be exit & save done
+		})) ;
 
 	return items;
 }
-static private Employee enterEmployee(InputOutput io) {
-			long id = EmployeeActions.getEmployeeId(io);
-			String name = io.readStringPredicate("Enter name", "Name may contain only letters with first capital",
-					str -> str.matches("[A-Z][a-z]+"));
-			LocalDate birthDate = io.readDate("Enter birthdate in the yyyy-MM-dd format");
-			int salary = io.readInt("Enter Salary", 0, Integer.MAX_VALUE-1);
-			String department = io.readStringOption("Enter department from list" + DEPARTMENTS, DEPARTMENTS).toLowerCase();
-			//String department = io.readString("enter department").toLowerCase();
-			return  new Employee(id, name, birthDate, salary, department);
+
+private static void hireEmployee(InputOutput io) {
+	long id = getId(io, true);
+	String name = getName(io);
+	
+	LocalDate birthdate = getBirthDate(io);
+	int salary = getSalary(io);
+	String department = getDepartment(io);
+	Employee empl = new Employee(id, name, birthdate , salary , department );
+	io.writeObjectLine(employees.addEmployee(empl));
+}
+private static String getDepartment(InputOutput io) {
+	
+	return io.readStringOption("Enter department " + departments, departments);
+}
+private static int getSalary(InputOutput io) {
+	
+	return io.readInt("Enter salary", MIN_SALARY, MAX_SALARY);
+}
+private static LocalDate getBirthDate(InputOutput io) {
+	
+	return io.readDate("Enter birthdate in the yyyy-MM-dd format");
+}
+private static String getName(InputOutput io) {
+	
+	return  io.readStringPredicate("Enter name", "Name may contain only letters with first capital",
+			str -> str.matches("[A-Z][a-z]+"));
+}
+private static long getId(InputOutput io, boolean flHire) {
+	long idRes = Long.parseLong(io.readStringPredicate("Enter Employee's ID", "Wrong ID input", str -> str.matches("\\d{9}")));
+	Employee empl = employees.getEmployee(idRes);
+	if(empl != null && flHire) {
+		throw new RuntimeException(String.format("Employee with id %d already exists", idRes));
+	}
+	if(empl == null && !flHire) {
+		throw new RuntimeException(String.format("Employee with id %d not found", idRes));
+	}
+	return idRes;
+}
+private static void fireEmployee(InputOutput io) {
+	long id = getId(io, false);
+	io.writeObjectLine(employees.removeEmployee(id));
+}
+private static void updateSalary(InputOutput io) {
+	long id = getId(io, false);
+	int salary = getSalary(io);
+	io.writeObjectLine(employees.updateSalary(id, salary));
+}
+private static void updateDepartment(InputOutput io) {
+	long id = getId(io, false);
+	String department = getDepartment(io);
+	io.writeObjectLine(employees.updateDepartment(id, department));
+}
+private static void displayEmployee(InputOutput io) {
+	long id = getId(io, false);
+	Employee empl = employees.getEmployee(id);
+	io.writeObjectLine(empl);
+}
+private static void displayEmployeesAge(InputOutput io) {
+	int fromTo[] = getFromTo(io, "Age", MIN_AGE, MAX_AGE);
+	employeesOutput(io, employees.getEmployeesByAge(fromTo[0], fromTo[1]));
+}
+private static void employeesOutput(InputOutput io, Iterable<Employee> employeesIterable) {
+	boolean isNotEmpty = employeesIterable.iterator().hasNext();
+	if (!isNotEmpty) {
+		io.writeObjectLine("No Employees found");
+	} else {
+		employeesIterable.forEach(io::writeObjectLine);
+	}
+	
 	
 }
-
-private static long getEmployeeId(InputOutput io) {
-	return Long.parseLong(io.readStringPredicate("enter id", "wrong format for ID", str -> str.matches("\\d{9}")));
+private static int[] getFromTo(InputOutput io, String type, int min, int max) {
+	int from = io.readInt(String.format("Enter %s value from", type), min, max);
+	int to = io.readInt(String.format("Enter %s value to", type), from + 1, max);
+	return new int[] {from, to};
 }
-static private void addEmployee(InputOutput io) {
-	io.writeObjectLine(employees.addEmployee(EmployeeActions.enterEmployee(io)));
+private static void displayEmployeesSalary(InputOutput io) {
+	int fromTo[] = getFromTo(io, "Salary", MIN_SALARY, MAX_SALARY);
+	employeesOutput(io, employees.getEmployeesBySalary(fromTo[0], fromTo[1]));
 }
-static private  void removeEmployee(InputOutput io) {
-	io.writeObjectLine(employees.removeEmployee(EmployeeActions.getEmployeeId(io)));
+private static void displayEmployeesDepartment(InputOutput io) {
+	String department = getDepartment(io);
+	employeesOutput(io, employees.getEmployeesByDepartment(department));
 }
-static private  void getAllEmployees(InputOutput io) {
-	 io.writeObjectLine(employees.getAllEmployees());
+private static void displayEmployeesSalaryDepartment(InputOutput io) {
+	String department = getDepartment(io);
+	int fromTo[] = getFromTo(io, "salary", MIN_SALARY, MAX_SALARY);
+	employeesOutput(io, employees.getEmployeesByDepartmentAndSalary(department, fromTo[0], fromTo[1]));
 }
-static private  void getEmployee(InputOutput io) {
-	io.writeObjectLine(employees.getEmployee(EmployeeActions.getEmployeeId(io)));
+private static void displayEmployees(InputOutput io) {
+	employeesOutput(io, employees.getAllEmployees());
 }
-
-static private  void getEmployeesByAge(InputOutput io) {
-	int ageFrom = io.readInt("enter age range FROM", MIN_AGE, MAX_AGE-1);
-	int ageTo = io.readInt("enter age range TO",ageFrom+1, MAX_AGE);
-	
-	io.writeObjectLine((employees.getEmployeesByAge(ageFrom, ageTo)));
-}
-
-static private  void getEmployeesBySalary(InputOutput io) {
-	int minSalary = io.readInt("Enter min range for salary", MIN_SALARY, Integer.MAX_VALUE-1);
-	int maxSalary = io.readInt("Enter max range for salary", minSalary+1, Integer.MAX_VALUE);
-	
-	io.writeObjectLine(employees.getEmployeesBySalary(minSalary, maxSalary));
-}
-
-static private  void getEmployeesByDepartment(InputOutput io) {
-	String department = io.readStringOption("Enter department " + DEPARTMENTS, DEPARTMENTS).toLowerCase();
-	io.writeObjectLine(employees.getEmployeesByDepartment(department));
-}
-
-static private  void getEmployeesByDepartmentAndSalary(InputOutput io) {
-	String department = io.readStringOption("Enter department from list" + DEPARTMENTS, DEPARTMENTS).toLowerCase();
-	
-	int minSalary = io.readInt("Enter min range for salary",MIN_SALARY, Integer.MAX_VALUE-1);
-	int maxSalary = io.readInt("Enter max range for salary", minSalary+1, Integer.MAX_VALUE);
-	io.writeObjectLine(employees.getEmployeesByDepartmentAndSalary(department, minSalary, maxSalary));
-}
-static private  void updateSalary(InputOutput io) {
-	
-	long emplID = EmployeeActions.getEmployeeId(io);
-	int actualSalary = employees.getEmployee(emplID).salary;
-	int newSalary = io.readInt("Enter new Salary", actualSalary+1, Integer.MAX_VALUE);
-
-	io.writeObjectLine(employees.updateSalary(emplID, newSalary));
-}
-static private  void updateDepartment(InputOutput io) {
-	long emplID = EmployeeActions.getEmployeeId(io);
-	io.writeObjectLine("Now works in " + employees.getEmployee(emplID).department);
-	String newDepartment = io.readStringOption("enter new department from list" + DEPARTMENTS, DEPARTMENTS).toLowerCase();
-	io.writeObjectLine(employees.updateDepartment(emplID, newDepartment));
-
-}
-
 }

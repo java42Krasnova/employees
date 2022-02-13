@@ -1,23 +1,47 @@
 package telran.employees.controller;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.HashSet;
 
-import telran.employees.services.EmployeesMethods;
-import telran.employees.services.EmployeesMethodsMapsImpl;
-import telran.view.ConsoleInputOutput;
-import telran.view.InputOutput;
-import telran.view.Item;
-import telran.view.Menu;
+import telran.employees.services.*;
+import telran.view.*;
 
 public class EmployeeAppl {
-public static void main(String[] args) {
-	InputOutput io = new ConsoleInputOutput();
-	EmployeesMethods employees = new EmployeesMethodsMapsImpl();
-	ArrayList<Item> items = EmployeeActions.getEmployeesMenuItems(employees);
-	
-	Menu menu = new Menu("Employees Menu", items);
-	
-	menu.perform(io);
-	
-}
+
+	public static void main(String[] args) {
+		InputOutput io = new ConsoleInputOutput();
+
+		if (args.length < 1) {
+			io.writeObjectLine("Usage - argument should contain configurartion file name");
+			return;
+		}
+		// Configuration file contains text line personDataFile = employees.data
+		// Apply BufferReader for reading configuration
+		//TODO done
+		String fileName = getFileName(args[0]);
+		if(fileName == null) {
+			io.writeObjectLine("Wrong configuration file");
+			return;
+		}
+		EmployeesMethods employeesMethods = new EmployeesMethodsMapsImpl(fileName);
+		employeesMethods.restore();
+		HashSet<String> departments = new HashSet<>(Arrays.asList("QA", "Development", "HR", "Management"));
+		Menu menu = new Menu("Employees Application", EmployeeActions.getActionItems(employeesMethods, departments));
+		menu.perform(io);
+	}
+
+	private static String getFileName(String configFile) {
+		// TODO done
+		try(BufferedReader reader = new BufferedReader(new FileReader(configFile));) {
+			return reader.readLine();
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }
