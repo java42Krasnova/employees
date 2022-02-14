@@ -6,7 +6,9 @@ import telran.employees.dto.ReturnCode;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.LocalDate;
@@ -153,10 +155,9 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 	@Override
 	public void save() {
 		// TODO done
-		File outputFile = new File(fileName);
-		try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(outputFile));){
+		try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName));){
 			outputStream.writeObject(this);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -164,19 +165,21 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 	@Override
 	public void restore() {
 		// TODO done
-		File inputFile = new File(fileName);
-		try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(inputFile));) {
+		try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));) {
 			EmployeesMethodsMapsImpl restoredMaps = (EmployeesMethodsMapsImpl) inputStream.readObject();
 			this.employeesAge = restoredMaps.employeesAge;
 			this.employeesDepartment = restoredMaps.employeesDepartment;
 			this.employeesSalary = restoredMaps.employeesSalary;
 			this.mapEmployees = restoredMaps.mapEmployees;
-		} catch (Exception e) {
+		} catch (FileNotFoundException e) {
 			this.mapEmployees = new HashMap<>();
 			this.employeesAge = new TreeMap<>();
 			this.employeesSalary = new TreeMap<>();
 			this.employeesDepartment = new HashMap<>();
-		}
+			return;
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		} 
 	}
 
 }

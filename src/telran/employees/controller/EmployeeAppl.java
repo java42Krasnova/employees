@@ -8,11 +8,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Properties;
 
 import telran.employees.services.*;
 import telran.view.*;
 
 public class EmployeeAppl {
+
+	private static final String CONFIGURATION_NAME = "personDataFile";
+	private static final String FILE_FOR_SAVING = "employees.data";
 
 	public static void main(String[] args) {
 		InputOutput io = new ConsoleInputOutput();
@@ -26,7 +30,7 @@ public class EmployeeAppl {
 		//TODO done
 		String fileName = getFileName(args[0]);
 		if(fileName == null) {
-			io.writeObjectLine("Wrong configuration file");
+			io.writeObjectLine("No or Invalid configuration file");
 			return;
 		}
 		EmployeesMethods employeesMethods = new EmployeesMethodsMapsImpl(fileName);
@@ -37,11 +41,21 @@ public class EmployeeAppl {
 	}
 
 	private static String getFileName(String configFile) {
-		// TODO done
-		try(BufferedReader reader = new BufferedReader(new FileReader(configFile));) {
-			return reader.readLine();
-		} catch (Exception e) {
+		Properties properties = new Properties();
+		if(!new File(configFile).exists()) {
 			return null;
 		}
+		try(BufferedReader br = new BufferedReader(new FileReader(configFile))) {
+			properties.load(br);
+			if(properties.size()==0)
+			{
+				properties.put(CONFIGURATION_NAME, FILE_FOR_SAVING);
+			}
+		} catch (IOException e) {
+			return null;
+		}
+		return properties.getProperty(CONFIGURATION_NAME ,FILE_FOR_SAVING);
+		// TODO done
+		
 	}
 }

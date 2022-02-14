@@ -31,9 +31,7 @@ public static ArrayList<Item> getActionItems(EmployeesMethods employees, Set<Str
 			Item.of("Display Employees Info of Department", EmployeeActions::displayEmployeesDepartment),
 			Item.of("Display Employees Info filtered by Salary and Department", EmployeeActions::displayEmployeesSalaryDepartment),
 			Item.of("Display Employees Info", EmployeeActions::displayEmployees),
-			Item.of("Save without Exit", io -> employees.save()),
-			Item.of("Save and Exit", io -> employees.save(), true),
-			Item.exit()//TODO there should be exit & save done
+			Item.of("Save and Exit", io -> employees.save(), true),	//TODO there should be exit & save done
 		})) ;
 
 	return items;
