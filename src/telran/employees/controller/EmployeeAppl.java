@@ -30,7 +30,7 @@ public class EmployeeAppl {
 		//TODO done
 		String fileName = getFileName(args[0]);
 		if(fileName == null) {
-			io.writeObjectLine("No or Invalid configuration file");
+			io.writeObjectLine("No  configuration file");
 			return;
 		}
 		EmployeesMethods employeesMethods = new EmployeesMethodsMapsImpl(fileName);
@@ -47,10 +47,6 @@ public class EmployeeAppl {
 		}
 		try(BufferedReader br = new BufferedReader(new FileReader(configFile))) {
 			properties.load(br);
-			if(properties.size()==0)
-			{
-				properties.put(CONFIGURATION_NAME, FILE_FOR_SAVING);
-			}
 		} catch (IOException e) {
 			return null;
 		}

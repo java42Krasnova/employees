@@ -176,7 +176,6 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 			this.employeesAge = new TreeMap<>();
 			this.employeesSalary = new TreeMap<>();
 			this.employeesDepartment = new HashMap<>();
-			return;
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage());
 		} 
