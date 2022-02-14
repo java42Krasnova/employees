@@ -14,7 +14,7 @@ import telran.view.*;
 
 public class EmployeeAppl {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) /*throws IOException*/ {
 		InputOutput io = new ConsoleInputOutput();
 
 		if (args.length < 1) {
@@ -36,12 +36,20 @@ public class EmployeeAppl {
 		menu.perform(io);
 	}
 
-	private static String getFileName(String configFile) {
+	private static String getFileName(String configFile)  /*throws IOException*/ {
 		// TODO done
+		/*
+		BufferedReader reader = new BufferedReader(new FileReader(configFile));
+		return reader.readLine();
+		*/
+		
 		try(BufferedReader reader = new BufferedReader(new FileReader(configFile));) {
+			// V.R. Properties?
 			return reader.readLine();
+		// V.R. FileNotFoundException	
 		} catch (Exception e) {
 			return null;
 		}
+		
 	}
 }
