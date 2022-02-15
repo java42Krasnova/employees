@@ -17,6 +17,7 @@ public class EmployeeAppl {
 
 	private static final String CONFIGURATION_NAME = "personDataFile";
 	private static final String FILE_FOR_SAVING = "employees.data";
+	private static final String WRONG_KEY_VALUE = "Empty configuration";
 
 	public static void main(String[] args) {
 		InputOutput io = new ConsoleInputOutput();
@@ -27,10 +28,14 @@ public class EmployeeAppl {
 		}
 		// Configuration file contains text line personDataFile = employees.data
 		// Apply BufferReader for reading configuration
-		//TODO done
+		// TODO done
 		String fileName = getFileName(args[0]);
-		if(fileName == null) {
+		if (fileName == null) {
 			io.writeObjectLine("No  configuration file");
+			return;
+		}
+		if (fileName == WRONG_KEY_VALUE) {
+			io.writeObjectLine("wrong key Value in configuration file");
 			return;
 		}
 		EmployeesMethods employeesMethods = new EmployeesMethodsMapsImpl(fileName);
@@ -42,16 +47,22 @@ public class EmployeeAppl {
 
 	private static String getFileName(String configFile) {
 		Properties properties = new Properties();
-		if(!new File(configFile).exists()) {
+		String res;
+		if (!new File(configFile).exists()) {
 			return null;
 		}
-		try(BufferedReader br = new BufferedReader(new FileReader(configFile))) {
+		try (BufferedReader br = new BufferedReader(new FileReader(configFile))) {
 			properties.load(br);
+			res = properties.getProperty(CONFIGURATION_NAME);
+			if (res == null || res.isEmpty() ) {
+				return WRONG_KEY_VALUE;
+			}
 		} catch (IOException e) {
-			return null;
+			throw new RuntimeException(e.getMessage());
 		}
-		return properties.getProperty(CONFIGURATION_NAME ,FILE_FOR_SAVING);
+		return res;
+		// return properties.getProperty(CONFIGURATION_NAME,FILE_FOR_SAVING);
 		// TODO done
-		
+
 	}
 }
