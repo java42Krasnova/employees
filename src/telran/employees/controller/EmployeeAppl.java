@@ -48,6 +48,8 @@ public class EmployeeAppl {
 	private static String getFileName(String configFile) {
 		Properties properties = new Properties();
 		String res;
+		// V.R. exists(0 isn't enough, it may be directory.
+		// isFile() is suitable
 		if (!new File(configFile).exists()) {
 			return null;
 		}
