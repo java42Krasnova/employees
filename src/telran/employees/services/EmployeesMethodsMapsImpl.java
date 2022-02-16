@@ -172,6 +172,7 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 			this.employeesSalary = restoredMaps.employeesSalary;
 			this.mapEmployees = restoredMaps.mapEmployees;
 		} catch (FileNotFoundException e) {
+			//[YG] unneeded statements. 
 			this.mapEmployees = new HashMap<>();
 			this.employeesAge = new TreeMap<>();
 			this.employeesSalary = new TreeMap<>();
