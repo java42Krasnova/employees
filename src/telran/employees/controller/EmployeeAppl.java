@@ -54,6 +54,7 @@ public class EmployeeAppl {
 		try (BufferedReader br = new BufferedReader(new FileReader(configFile))) {
 			properties.load(br);
 			res = properties.getProperty(CONFIGURATION_NAME);
+			//[YG] - better to introduce default value
 			if (res == null || res.isEmpty() ) {
 				return WRONG_KEY_VALUE;
 			}
