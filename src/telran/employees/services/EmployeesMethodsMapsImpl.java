@@ -1,38 +1,28 @@
-
 package telran.employees.services;
 
 import telran.employees.dto.Employee;
 import telran.employees.dto.ReturnCode;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.StreamSupport;
-
+import java.io.*;
 public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
 	public EmployeesMethodsMapsImpl(String fileName) {
 		this.fileName = fileName;
 	}
-	private transient String fileName;// field
-	private HashMap<Long, Employee> mapEmployees; //= new HashMap<>(); // key employee's id, value - employee
-	private TreeMap<Integer, List<Employee>> employeesAge; //= new TreeMap<>(); // key - age, value - list of employees
-																				// with the same age
-	private TreeMap<Integer, List<Employee>> employeesSalary; //= new TreeMap<>(); // key - salary,
-	// value - list of employees with the same salary
-	private HashMap<String, List<Employee>> employeesDepartment; //= new HashMap<>();
 
+	private transient String fileName; //field won't be serialized
+ private HashMap<Long, Employee> mapEmployees = new HashMap<>(); //key employee's id, value - employee
+ private TreeMap<Integer, List<Employee>> employeesAge= new TreeMap<>(); //key - age, value - list of employees with the same age
+ private TreeMap<Integer, List<Employee>> employeesSalary = new TreeMap<>(); //key - salary,
+ //value - list of employees with the same salary
+ private HashMap<String, List<Employee>> employeesDepartment = new HashMap<>();
 	@Override
 	public ReturnCode addEmployee(Employee empl) {
 		if (mapEmployees.containsKey(empl.id)) {
@@ -43,13 +33,13 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 		employeesAge.computeIfAbsent(getAge(emplS), k -> new LinkedList<Employee>()).add(emplS);
 		employeesSalary.computeIfAbsent(emplS.salary, k -> new LinkedList<Employee>()).add(emplS);
 		employeesDepartment.computeIfAbsent(emplS.department, k -> new LinkedList<Employee>()).add(emplS);
-
+		
 		return ReturnCode.OK;
 	}
 
 	private Integer getAge(Employee emplS) {
-
-		return (int) ChronoUnit.YEARS.between(emplS.birthDate, LocalDate.now());
+		
+		return (int)ChronoUnit.YEARS.between(emplS.birthDate, LocalDate.now());
 	}
 
 	@Override
@@ -66,13 +56,15 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 
 	@Override
 	public Iterable<Employee> getAllEmployees() {
-
+		
 		return copyEmployees(mapEmployees.values());
 	}
 
 	private Iterable<Employee> copyEmployees(Collection<Employee> employees) {
-
-		return employees.stream().map(empl -> copyOneEmployee(empl)).toList();
+		
+		return employees.stream()
+				.map(empl -> copyOneEmployee(empl))
+				.toList();
 	}
 
 	private Employee copyOneEmployee(Employee empl) {
@@ -87,19 +79,21 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 
 	@Override
 	public Iterable<Employee> getEmployeesByAge(int ageFrom, int ageTo) {
-		Collection<List<Employee>> lists = employeesAge.subMap(ageFrom, true, ageTo, true).values();
+		Collection<List<Employee>> lists =
+				employeesAge.subMap(ageFrom, true, ageTo, true).values();
 		List<Employee> employeesList = getCombinedList(lists);
 		return copyEmployees(employeesList);
 	}
 
 	private List<Employee> getCombinedList(Collection<List<Employee>> lists) {
-
+		
 		return lists.stream().flatMap(List::stream).toList();
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesBySalary(int salaryFrom, int salaryTo) {
-		Collection<List<Employee>> lists = employeesSalary.subMap(salaryFrom, true, salaryTo, true).values();
+		Collection<List<Employee>> lists =
+				employeesSalary.subMap(salaryFrom, true, salaryTo, true).values();
 		List<Employee> employeesList = getCombinedList(lists);
 		return copyEmployees(employeesList);
 	}
@@ -107,19 +101,20 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 	@Override
 	public Iterable<Employee> getEmployeesByDepartment(String department) {
 		List<Employee> employees = employeesDepartment.getOrDefault(department, Collections.emptyList());
-
+		
 		return employees.isEmpty() ? employees : copyEmployees(employees);
 	}
 
-	@Override
-	public Iterable<Employee> getEmployeesByDepartmentAndSalary(String department, int salaryFrom, int salaryTo) {
-		Iterable<Employee> employeesByDepartment = getEmployeesByDepartment(department);
-		HashSet<Employee> employeesBySalary = new HashSet<>(
-				(List<Employee>) getEmployeesBySalary(salaryFrom, salaryTo));
+	
 
+	@Override
+	public Iterable<Employee> getEmployeesByDepartmentAndSalary(String department, int salaryFrom,
+			int salaryTo) {
+		Iterable<Employee> employeesByDepartment = getEmployeesByDepartment(department);
+		HashSet<Employee> employeesBySalary = new HashSet<>((List<Employee>)getEmployeesBySalary(salaryFrom, salaryTo));
+		
 		return StreamSupport.stream(employeesByDepartment.spliterator(), false)
-				// .filter(employeesBySalary::contains).toList();
-				.filter(c -> employeesBySalary.contains(c)).toList();
+				.filter(employeesBySalary::contains).toList();
 	}
 
 	@Override
@@ -153,32 +148,30 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 	}
 
 	@Override
-	public void save() {
-		// TODO done
-		try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName));){
-			outputStream.writeObject(this);
-		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage());
+	public void restore() {
+		File inputFile = new File(fileName);
+		if (inputFile.exists()) {
+			try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(inputFile))) {
+				EmployeesMethodsMapsImpl employeesFromFile = (EmployeesMethodsMapsImpl) input.readObject();
+				this.employeesAge = employeesFromFile.employeesAge;
+				this.employeesDepartment =  employeesFromFile.employeesDepartment;
+				this.employeesSalary = employeesFromFile.employeesSalary;
+				this.mapEmployees = employeesFromFile.mapEmployees;
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage());
+			} 
 		}
+		
 	}
 
 	@Override
-	public void restore() {
-		// TODO done
-		try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName));) {
-			EmployeesMethodsMapsImpl restoredMaps = (EmployeesMethodsMapsImpl) inputStream.readObject();
-			this.employeesAge = restoredMaps.employeesAge;
-			this.employeesDepartment = restoredMaps.employeesDepartment;
-			this.employeesSalary = restoredMaps.employeesSalary;
-			this.mapEmployees = restoredMaps.mapEmployees;
-		} catch (FileNotFoundException e) {
-			this.mapEmployees = new HashMap<>();
-			this.employeesAge = new TreeMap<>();
-			this.employeesSalary = new TreeMap<>();
-			this.employeesDepartment = new HashMap<>();
+	public void save() {
+		try(ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(fileName))) {
+			output.writeObject(this);
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
-		} 
+			throw new RuntimeException(e.toString());
+		}
+		
 	}
 
 }
