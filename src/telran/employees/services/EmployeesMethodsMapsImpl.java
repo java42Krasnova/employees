@@ -47,11 +47,11 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 	static private ReadWriteLock lock4 = new ReentrantReadWriteLock();
 	static private Lock readLock4EmployeesDepartment = lock4.readLock();
 	static private Lock writeLock4EmployeeDepartment = lock4.writeLock();
-
-	/*
-	 * static private List<ReentrantReadWriteLock> readRwriteLockList =
-	 * getLockList(); static private List<Lock> readLockList = getReadLockList();
-	 * static private List<Lock> writeLocksList = getwriteLockList();
+	
+	 /* 
+	  static private List<ReentrantReadWriteLock> readRwriteLockList =
+	  getLockList(); static private List<Lock> readLockList = getReadLockList();
+	  static private List<Lock> writeLocksList = getwriteLockList();
 	 * 
 	 * private static List<ReentrantReadWriteLock> getLockList() { return
 	 * IntStream.range(0, 4).mapToObj(i -> new ReentrantReadWriteLock()).toList(); }
@@ -173,6 +173,7 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 			readLock2EmployeesAge.lock();
 			Collection<List<Employee>> lists = employeesAge.subMap(ageFrom, true, ageTo, true).values();
 			List<Employee> employeesList = getCombinedList(lists);
+			// V.R. It is good place for unlock(). getCombinedList() returns the copy
 			return copyEmployees(employeesList);
 		} finally {
 			readLock2EmployeesAge.unlock();
@@ -191,6 +192,7 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 			readLock3EmployeesSalary.lock();
 			Collection<List<Employee>> lists = employeesSalary.subMap(salaryFrom, true, salaryTo, true).values();
 			List<Employee> employeesList = getCombinedList(lists);
+			// V.R. It is good place for unlock(). getCombinedList() returns the copy
 			return copyEmployees(employeesList);
 		} finally {
 			readLock3EmployeesSalary.unlock();
@@ -219,6 +221,7 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 			readLock3EmployeesSalary.lock();
 			readLock4EmployeesDepartment.lock();
 			employeesByDepartment = getEmployeesByDepartment(department);
+			// V.R. The better place for readLock3EmployeesSalary.lock();
 			employeesBySalary = new HashSet<>((List<Employee>) getEmployeesBySalary(salaryFrom, salaryTo));
 			return StreamSupport.stream(employeesByDepartment.spliterator(), false).filter(employeesBySalary::contains)
 					.toList();
@@ -307,6 +310,7 @@ public class EmployeesMethodsMapsImpl implements EmployeesMethods {
 	@Override
 	public void save() {
 		try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(fileName))) {
+			// V.R. Where are lockers?
 			output.writeObject(this);
 		} catch (Exception e) {
 			throw new RuntimeException(e.toString());
