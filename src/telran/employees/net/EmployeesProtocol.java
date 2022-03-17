@@ -65,7 +65,7 @@ public class EmployeesProtocol implements ApplProtocol {
 	}
 
 	private String getDepartmentName(HashMap<String, Object> dataHash) {
-		return dataHash.entrySet().stream().map(k -> k.getKey()).findFirst().get();
+		return dataHash.keySet().stream().findFirst().get();
 	}
 
 	private Response _employee_department_get(Serializable requestData) {

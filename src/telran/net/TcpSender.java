@@ -32,6 +32,7 @@ public class TcpSender implements Sender, Closeable {
 
 	@Override
 	public void close() throws IOException {
+		System.out.println("JT");
 		socket.close();
 		
 	}

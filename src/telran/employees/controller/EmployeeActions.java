@@ -2,7 +2,7 @@ package telran.employees.controller;
 
 import java.time.LocalDate;
 import java.util.*;
-
+import java.io.*;
 import telran.employees.dto.Employee;
 import telran.employees.services.EmployeesMethods;
 import telran.view.*;
@@ -20,23 +20,33 @@ private EmployeeActions() {
 public static ArrayList<Item> getActionItems(EmployeesMethods employees, Set<String> departments) {
 	EmployeeActions.employees = employees;
 	EmployeeActions.departments = departments;
+	if (items == null) {
 		items = new ArrayList<>(Arrays.asList(new Item[] {
-			Item.of("Hiring new Employee", EmployeeActions::hireEmployee),
+			Item.of("Hiring new Employee", EmployeeActions::hireEmployee)	,
 			Item.of("Firing Employee ", EmployeeActions::fireEmployee )	,
-			Item.of("Updating salary", EmployeeActions::updateSalary),
-			Item.of("Updating department", EmployeeActions::updateDepartment),
-			Item.of("Display Employee Info", EmployeeActions::displayEmployee),
+			Item.of("Updating salary", EmployeeActions::updateSalary)	,
+			Item.of("Updating department", EmployeeActions::updateDepartment)	,
+			Item.of("Display Employee Info", EmployeeActions::displayEmployee)	,
 			Item.of("Display Employees Info filtered by Age", EmployeeActions::displayEmployeesAge)	,
-			Item.of("Display Employees Info filtered by Salary", EmployeeActions::displayEmployeesSalary),
-			Item.of("Display Employees Info of Department", EmployeeActions::displayEmployeesDepartment),
-			Item.of("Display Employees Info filtered by Salary and Department", EmployeeActions::displayEmployeesSalaryDepartment),
+			Item.of("Display Employees Info filtered by Salary", EmployeeActions::displayEmployeesSalary)	,
+			Item.of("Display Employees Info of Department", EmployeeActions::displayEmployeesDepartment)	,
+			Item.of("Display Employees Info filtered by Salary and Department", EmployeeActions::displayEmployeesSalaryDepartment)	,
 			Item.of("Display Employees Info", EmployeeActions::displayEmployees),
-			Item.of("Save and Exit", io -> employees.save(), true),	//TODO there should be exit & save done
+			Item.of("Exit", EmployeeActions::exit, true) 
+			
 		})) ;
-
+		
+	}
 	return items;
 }
-
+private static void exit(InputOutput io) {
+	try {
+		((Closeable)employees).close();
+	} catch (IOException e) {
+		
+		e.printStackTrace();
+	}
+}
 private static void hireEmployee(InputOutput io) {
 	long id = getId(io, true);
 	String name = getName(io);
