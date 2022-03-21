@@ -13,6 +13,6 @@ Iterable<Employee> getEmployeesByDepartment(String department);
 Iterable <Employee> getEmployeesByDepartmentAndSalary(String department, int salaryFrom, int salaryTo);
 ReturnCode updateSalary(long id, int newSalary);
 ReturnCode updateDepartment(long id, String newDepartment);
-void restore();//restore employees methods object from ObjectInputStream
-void save();//saves EmployeesMethods object into ObjectOutputStream
+void restore(); //restores EmployeesMethods object from ObjectInputStream
+void save(); //saves EmployeesMethods object into ObjectOutputStream
 }

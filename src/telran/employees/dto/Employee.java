@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Employee implements Serializable {
+public class Employee implements Serializable{
 /**
 	 * 
 	 */
@@ -21,19 +21,9 @@ public Employee(long id, String name, LocalDate birthDate, int salary, String de
 	this.salary = salary;
 	this.department = department;
 }
-
 public Employee() {
 	
 }
-public Employee(Employee employee) {
-	id = employee.id;
-	name = employee.name;
-	birthDate = employee.birthDate;
-	salary = employee.salary;
-	department =employee.department;
-}
-
-
 @Override
 public int hashCode() {
 	return Objects.hash(id);
@@ -49,11 +39,10 @@ public boolean equals(Object obj) {
 	Employee other = (Employee) obj;
 	return id == other.id;
 }
-
 @Override
 public String toString() {
 	return "Employee [id=" + id + ", name=" + name + ", birthDate=" + birthDate + ", salary=" + salary + ", department="
-			+ department + "]\n";
+			+ department + "]";
 }
 
 }

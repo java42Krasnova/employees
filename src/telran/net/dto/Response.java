@@ -3,10 +3,6 @@ package telran.net.dto;
 import java.io.Serializable;
 
 public class Response implements Serializable {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	public ResponseCode responseCode;
 	public Serializable responseData;
@@ -14,5 +10,6 @@ public class Response implements Serializable {
 		this.responseCode = responseCode;
 		this.responseData = responseData;
 	}
+	
 
 }

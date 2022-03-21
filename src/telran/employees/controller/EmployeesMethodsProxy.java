@@ -6,18 +6,17 @@ import telran.employees.services.EmployeesMethods;
 import telran.net.Sender;
 import static telran.employees.net.dto.ApiConstants.*;
 
-import java.io.Serializable;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
-public class EmployeesMethodsTcpProxy implements EmployeesMethods {
+public class EmployeesMethodsProxy implements EmployeesMethods, Closeable {
 private Sender sender;
-
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public EmployeesMethodsTcpProxy(Sender sender) {
+	public EmployeesMethodsProxy(Sender sender) {
 		this.sender = sender;
 	}
 
@@ -29,7 +28,7 @@ private Sender sender;
 
 	@Override
 	public ReturnCode removeEmployee(long id) {
-		//TODO done
+		
 		return sender.send(REMOVE_EMPLOYEE, id);
 	}
 
@@ -41,64 +40,67 @@ private Sender sender;
 
 	@Override
 	public Employee getEmployee(long id) {
-		// TODO done
-		return sender.send(DISPLAY_EMPLOYEE, id);
+		
+		return sender.send(GET_EMPLOYEE, id);
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesByAge(int ageFrom, int ageTo) {
-		//TOO done
-		int[] ageRange = {ageFrom, ageTo};
-		return sender.send(GET_EMPLOYEES_BY_AGE, ageRange);
+		Integer[] fromTo = {ageFrom, ageTo};
+		return sender.send(GET_EMPLOYEES_AGE, fromTo);
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesBySalary(int salaryFrom, int salaryTo) {
-		//TOO done
-		int[] salaryRange = {salaryFrom, salaryTo};
-		return sender.send(GET_EMPLOYEES_BY_SALARY, salaryRange);
+		Integer[] fromTo = {salaryFrom, salaryTo};
+		return sender.send(GET_EMPLOYEES_SALARY, fromTo);
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesByDepartment(String department) {
-		// TODO done
-		return sender.send(GET_EMPLOYEES_BY_DEPARTMENT, department);
+		
+		return sender.send(GET_EMPLOYEES_DEPARTMENT, department);
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesByDepartmentAndSalary(String department, int salaryFrom, int salaryTo) {
-		// TODO Done
-		HashMap<String, Object> employeesBySalaryInDepInfo = new HashMap<>();
-		int[] salaryRange = {salaryFrom, salaryTo};
-		employeesBySalaryInDepInfo.put(department, salaryRange);
-		return sender.send(GET_EMPLOYEES_BY_SALARY_IN_DEPARTMENT, employeesBySalaryInDepInfo);
+		HashMap<String, Object> map = new HashMap<>();
+		map.put(DEPARTMENT, department);
+		Integer[] fromTo = {salaryFrom, salaryTo};
+		map.put(FROM_TO, fromTo);
+		return sender.send(GET_EMPLOYEES_DEPARTMENT_SALARY, map);
 	}
 
 	@Override
 	public ReturnCode updateSalary(long id, int newSalary) {
-		// TODO Done
-		HashMap<Long,Integer> salaryUpdateInfo = new HashMap<>();
-		salaryUpdateInfo.put(id, newSalary);
-		return sender.send(UPDATE_SALARY, salaryUpdateInfo);
+		HashMap<String, Object> map = new HashMap<>();
+		map.put(ID, id);
+		
+		map.put(SALARY, newSalary);
+		return sender.send(UPDATE_SALARY, map);
 	}
 
 	@Override
 	public ReturnCode updateDepartment(long id, String newDepartment) {
-		// TODO Done
-		HashMap<String,Object> departmentUpdateInfo = new HashMap<>();
-		departmentUpdateInfo.put(newDepartment,id);
-		return sender.send(UPDATE_DEPARTMENT, departmentUpdateInfo);
+		HashMap<String, Object> map = new HashMap<>();
+		map.put(ID, id);
+		
+		map.put(DEPARTMENT, newDepartment);
+		return sender.send(UPDATE_DEPARTMENT, map);
 	}
 
 	@Override
 	public void restore() {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void save() {
-		// TODO Auto-generated method stub
+	}
 
+	@Override
+	public void close() throws IOException {
+		sender.close();
+		
 	}
 
 }

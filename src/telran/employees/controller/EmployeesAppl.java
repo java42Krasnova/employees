@@ -20,7 +20,7 @@ static InputOutput io = new ConsoleInputOutput();
 		} catch (Exception e) {
 			io.writeObjectLine(e.toString());
 		}
-		EmployeesMethods employeesMethods = new EmployeesMethodsTcpProxy(sender);
+		EmployeesMethods employeesMethods = new EmployeesMethodsProxy(sender);
 		employeesMethods.restore();
 		HashSet<String> departments = new HashSet<>(Arrays.asList("QA", "Development", "HR", "Management"));
 		Menu menu = new Menu("Employees Application", EmployeeActions.getActionItems(employeesMethods, departments));
